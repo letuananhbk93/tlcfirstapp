@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1060</width>
+    <height>639</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>COLLECTION WINDOW</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>VIEW COLLECTION</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="MILESREDDButton">
+       <property name="text">
+        <string>MILES REDD</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" rowspan="17">
+      <widget class="QTableView" name="tableView"/>
+     </item>
+     <item row="0" column="2" rowspan="17">
+      <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Preview</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="SUZANNESHARPButton">
+       <property name="text">
+        <string>SUZANNE SHARP</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="VEEREGRENNEYButton">
+       <property name="text">
+        <string>VEERE GRENNEY</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QPushButton" name="PETERMIKICButton">
+       <property name="text">
+        <string>PETER MIKIC</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QPushButton" name="RITAKONIGButton">
+       <property name="text">
+        <string>RITA KONIG</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QPushButton" name="KRBButton">
+       <property name="text">
+        <string>KRB</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QPushButton" name="JANECHURCHILLButton">
+       <property name="text">
+        <string>JANE CHURCHILL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QPushButton" name="PENTREATHHALLButton">
+       <property name="text">
+        <string>PENTREATH - HALL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QPushButton" name="STEVENGAMBRELButton">
+       <property name="text">
+        <string>STEVEN GAMBREL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QPushButton" name="LUKEEDWARDHALLButton">
+       <property name="text">
+        <string>LUKE EDWARD HALL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QPushButton" name="JOHNDERIANButton">
+       <property name="text">
+        <string>JOHN DERIAN</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QPushButton" name="THELACQUERButton">
+       <property name="text">
+        <string>THE LACQUER COMPANY</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QPushButton" name="SCHUMACHERButton">
+       <property name="text">
+        <string>SCHUMACHER</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0">
+      <widget class="QPushButton" name="CHRISTOPHERSPITZMILLERButton">
+       <property name="text">
+        <string>CHRISTOPHER SPITZMILLER</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="0">
+      <widget class="QPushButton" name="SALVESENGRAHAMButton">
+       <property name="text">
+        <string>SALVESEN GRAHAM</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
+      <widget class="QPushButton" name="JEFFREYBILHUBERButton">
+       <property name="text">
+        <string>JEFFREY BILHUBER</string>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="0">
+      <widget class="QPushButton" name="CAMPBELLREYButton">
+       <property name="text">
+        <string>CAMPBELL-REY</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

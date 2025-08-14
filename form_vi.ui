@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>609</width>
+    <height>587</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">    QWidget {
+                background: white;
+            }
+            QLabel {
+                color: #C62828;
+                font-weight: bold;
+            }
+            QLineEdit, QTextEdit {
+                border: 1.5px solid black;
+                border-radius: 4px;
+                background: #fff;
+                padding: 4px;
+            }
+            QPushButton {
+                background-color: #FF3366; /* Default color */
+                color: white;
+                border: 1.5px solid #C62828;
+                border-radius: 12px;
+                padding: 6px 12px;
+                font-weight: bold;
+            }
+            QPushButton:checked {
+                background-color: #C62828; /* Checked color */
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QComboBox" name="LanguageBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">            QComboBox {
+                border: 1.5px solid #C62828;
+                border-radius: 12px;
+                padding: 4px 24px 4px 8px;
+                min-width: 60px;
+                font-weight: bold;
+                background: #fff;
+            }
+            QComboBox::drop-down {
+                border-left: 1.5px solid #C62828;
+                width: 24px;
+            }
+            QComboBox::down-arrow {
+                image: url(:/images/down-arrow.png);
+                width: 18px;
+                height: 18px;
+            }
+            QComboBox QAbstractItemView {
+                border: 1px solid #C62828;
+                selection-background-color: #fbe9e7;
+            }</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/images/tlclogo3.jpg</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="lineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>THÔNG TIN</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QTextEdit" name="textEdit"/>
+     </item>
+     <item row="2" column="1">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="collectionButton">
+           <property name="text">
+            <string>COLLECTION</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>MÀU</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="HieuUngButton">
+           <property name="text">
+            <string>HIỆU ỨNG</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ThemButton">
+           <property name="text">
+            <string>THÊM / CẬP NHẬT</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QPushButton" name="BVSTDButton">
+           <property name="text">
+            <string>BẢN VẼ STD</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="TCQCButton">
+           <property name="text">
+            <string>TIÊU CHUẨN QC</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ImportExcelButton">
+           <property name="text">
+            <string>IN CHECKSHET</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="defectlistbutton">
+           <property name="text">
+            <string>LIST LỖI QUÁ KHỨ</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

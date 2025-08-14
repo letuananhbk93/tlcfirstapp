@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/images">
+    <file>down-arrow.png</file>
+    <file>tlclogo4.png</file>
+    <file>tlclogo3.jpg</file>
+    <file>vi.png</file>
+    <file>en.png</file>
+  </qresource>
+</RCC>
