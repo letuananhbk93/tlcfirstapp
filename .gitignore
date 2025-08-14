@@ -1,0 +1,76 @@
+# =========================
+# 1) IDE / Hệ điều hành
+# =========================
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# =========================
+# 2) Python / (Py)Qt / PyInstaller
+# =========================
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+dist/
+build/
+UI old PY/
+new form UI/
+*.spec
+# Qt/C++ build artifacts
+build-*/
+.moc/
+*.o
+*.obj
+*.qrc.depends
+*.user
+
+# =========================
+# 3) Android / Gradle / IntelliJ
+# =========================
+# Build outputs
+**/build/
+.cxx/
+.gradle/
+local.properties
+captures/
+# Nếu bạn muốn giữ 1 số file cấu hình code style thì bỏ comment phần dưới và
+# xóa dòng .idea/ ở trên, nhưng quản lý .idea phức tạp — an toàn nhất là ignore toàn bộ .idea
+
+# =========================
+# 4) Nhị phân, gói đóng gói, tệp lớn
+# =========================
+*.exe
+*.pkg
+*.msi
+*.zip
+*.7z
+*.rar
+
+
+# =========================
+# 5) Logs / Cache / Tools
+# =========================
+*.log
+*.tmp
+*.swp
+.history/
+.pytest_cache/
+.mypy_cache/
+
+# =========================
+# 6) Ghi chú hoặc file chứa secrets (ví dụ bạn nêu)
+# =========================
+Code note.txt
+UI old PY/warehouse_ver/Code note.txt
+
+# 7) File word, excel 
+*.xlsx
+*.doc
+*.docx
+*.xls
