@@ -6,7 +6,7 @@ import urllib.request
 import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
-from sympy import re
+#from sympy import re
 from form import Ui_Form
 from color_form import Ui_Form as Ui_ColorDialog
 from effect_form import Ui_Form as Ui_EffectDialog
@@ -630,6 +630,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                                 top=cell.border.top,
                                 bottom=thin
                             )
+                            
                     import openpyxl
                     from PyQt5.QtWidgets import QFileDialog, QMessageBox
                     import re, os
@@ -710,7 +711,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                         if col5=="Carcass"or col5=="CARCASS":
                             save_filename2 = f"{po_number}_{col2}-{col3}_OnlyCarcass_{current_sheet}_{col4_value}.xlsx"
                         else:
-                            save_filename2 = f"{po_number}_{col2}-{col3}_Carcass_{current_sheet}_{col4_value}.xlsx"
+                            save_filename2 = f"{po_number}_{col2}-{col3}_Carcass+Final_{current_sheet}_{col4_value}.xlsx"
                         save_filename2 = re.sub(r'[\\/*?:"<>|]', "_", save_filename2)
                         save_path2 = os.path.join(folder, save_filename2)
 
@@ -883,10 +884,12 @@ class ColorSearchApp(QtWidgets.QWidget):
                                 wb2.save(save_path2)
                                 success_count_carcass += 1
                             else:
+                                ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass+Final_{current_sheet}_{col4_value}"
                                 wb.save(save_path)
                                 wb2.save(save_path2)
                                 success_count_final += 1
                                 success_count_carcass += 1
+
                                 # --- Combine wb and wb2 (A to P, all rows, keep format/merge) ---
                                 import xlwings as xw
                                 with xw.App(visible=False) as app:
@@ -896,10 +899,10 @@ class ColorSearchApp(QtWidgets.QWidget):
                                     wb_xlw = app.books.open(save_path)
                                     wb2_xlw = app.books.open(save_path2)
 
-                                    ws = wb_xlw.sheets[0]   # or use the sheet name if needed
-                                    ws2 = wb2_xlw.sheets[0] # or use the sheet name if needed
+                                    ws = wb_xlw.sheets[0]
+                                    ws2 = wb2_xlw.sheets[0]
 
-                                    # Find last used row in ws (main file)
+                                    # Find last used row in ws (final file)
                                     last_row = ws.range("A" + str(ws.cells.last_cell.row)).end("up").row
 
                                     # Find last used row in ws2 (carcass file)
@@ -921,8 +924,14 @@ class ColorSearchApp(QtWidgets.QWidget):
                                     ws2.api.PageSetup.PrintArea = f"$A$1:$P${new_last_row2}"
 
                                     wb2_xlw.save()
-                                    wb_xlw.close()
                                     wb2_xlw.close()
+                                    wb_xlw.close()
+                                    if os.path.exists(save_path):
+                                        try:
+                                            os.remove(save_path)
+                                        except Exception as e:
+                                            QtWidgets.QMessageBox.warning(self, "Lỗi", f"Không thể xóa file tạm thời:\n{e}")
+                                    
                                     
                         except Exception as e:
                             QMessageBox.critical(self, "Lỗi", f"Không thể lưu file Excel:\n{e}")                            
