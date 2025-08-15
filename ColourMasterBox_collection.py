@@ -733,7 +733,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                         # Open QC file
                         qc_wb = openpyxl.load_workbook(qc_path, data_only=True)
 
-                        # --- Format_fin_vi logic (as you already have) ---
+                        # --- Format_fin_vi logic ---
                         if "ANH THIỆP" in current_sheet.upper():
                             matrix_ws = qc_wb["MatrixATHIEP"]
                         else:
@@ -806,6 +806,8 @@ class ColorSearchApp(QtWidgets.QWidget):
                             add_bottom_border(ws, last_row, start_col=1, end_col=16)
 
                             ws.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Final_{current_sheet}_{col4_value}"
+                            from datetime import datetime
+                            ws.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
 
                         # --- Format_car_vi logic (same, but for MatrixCarcass/HangmucCarcass and ws2) ---
                         if "MatrixCarcass" in qc_wb.sheetnames and "HangmucCarcass" in qc_wb.sheetnames:
@@ -872,6 +874,8 @@ class ColorSearchApp(QtWidgets.QWidget):
                             last_row2 = last_data_row(ws2, max_col=12)
                             ws2.print_area = f"A1:P{last_row2}"
                             ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass_{current_sheet}_{col4_value}"
+                            from datetime import datetime
+                            ws2.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
 
                         # Save the combined workbook
                         try:
@@ -883,8 +887,45 @@ class ColorSearchApp(QtWidgets.QWidget):
                                 wb2.save(save_path2)
                                 success_count_final += 1
                                 success_count_carcass += 1
+                                # --- Combine wb and wb2 (A to P, all rows, keep format/merge) ---
+                                import xlwings as xw
+                                with xw.App(visible=False) as app:
+                                    app.display_alerts = False
+                                    app.screen_updating = False
+
+                                    wb_xlw = app.books.open(save_path)
+                                    wb2_xlw = app.books.open(save_path2)
+
+                                    ws = wb_xlw.sheets[0]   # or use the sheet name if needed
+                                    ws2 = wb2_xlw.sheets[0] # or use the sheet name if needed
+
+                                    # Find last used row in ws (main file)
+                                    last_row = ws.range("A" + str(ws.cells.last_cell.row)).end("up").row
+
+                                    # Find last used row in ws2 (carcass file)
+                                    last_row2 = ws2.range("A" + str(ws2.cells.last_cell.row)).end("up").row
+
+                                    # Copy A1:P{last_row} from ws
+                                    rng_to_copy = ws.range(f"A2:P{last_row}")
+                                    # Paste to ws2, starting at first empty row (last_row2 + 2)
+                                    dest_rng = ws2.range(f"A{last_row2 + 2}")
+                                    rng_to_copy.api.Copy(dest_rng.api)
+
+                                    # Set row height for the first pasted row (last_row2 + 1)
+                                    ws2.range(f"{last_row2 + 1}:{last_row2 + 1}").row_height = 27
+
+                                    # Find new last row after paste
+                                    new_last_row2 = ws2.range("A" + str(ws2.cells.last_cell.row)).end("up").row
+
+                                    # Set print area again (A1:P{new_last_row2})
+                                    ws2.api.PageSetup.PrintArea = f"$A$1:$P${new_last_row2}"
+
+                                    wb2_xlw.save()
+                                    wb_xlw.close()
+                                    wb2_xlw.close()
+                                    
                         except Exception as e:
-                            QMessageBox.critical(self, "Lỗi", f"Không thể lưu file Excel:\n{e}")
+                            QMessageBox.critical(self, "Lỗi", f"Không thể lưu file Excel:\n{e}")                            
 
                     QMessageBox.information(self, "Thành công", f"Đã xuất {success_count_final} file Excel Final và {success_count_carcass} file Excel Carcass thành công!")
             # Show the dialog
