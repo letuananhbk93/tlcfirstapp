@@ -485,6 +485,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                     self.server_path = server_path
                     self.check_models = {}  # Store models for each sheet
                     self.ui.exportexcel.clicked.connect(self.export_checked_rows)
+                    self.ui.lineEdit.setText(os.path.basename(file_path))
 
                     # Dynamically create buttons for each sheet
                     self.buttons = []
