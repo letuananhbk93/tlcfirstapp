@@ -244,7 +244,7 @@ class ColorSearchApp(QtWidgets.QWidget):
             from PyQt5.QtWidgets import QCompleter
 
             completer = QCompleter(sorted(self.all_product_names), self)
-            completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+            completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)  # CaseInsensitive
             self.ui.lineEdit.setCompleter(completer)
 
             # Language setup
@@ -419,8 +419,8 @@ class ColorSearchApp(QtWidgets.QWidget):
         table.setColumnWidth(1, 220)
         table.verticalHeader().setVisible(False)
         # Set text alignment for all cells to center (both vertically and horizontally)
-        table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
-        table.verticalHeader().setDefaultAlignment(QtCore.Qt.AlignVCenter)
+        table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        table.verticalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Enable row click toggling checkbox
         def toggle_checkbox_on_row_click(index):
@@ -517,12 +517,12 @@ class ColorSearchApp(QtWidgets.QWidget):
                         return
                     checked_count = 0
                     for row in range(model.rowCount()):
-                        check_item = model.item(row, 0)
-                        if check_item is not None and check_item.checkState() == QtCore.Qt.Checked:
+                        index = model.index(row, 0)
+                        if index.isValid() and model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole) == QtCore.Qt.CheckState.Checked:
                             checked_count += 1
                     total_count = model.rowCount()
                     self.ui.textEdit.setText(f"{checked_count}/{total_count}")
-                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignCenter)  # Center text horizontally and vertically
+                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)  # Center text horizontally and vertically
     
                 def show_sheet(self, sheet_name):
                     df = self.sheet_data[sheet_name]
@@ -557,7 +557,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                         items = []
                         check_item = QtGui.QStandardItem()
                         check_item.setCheckable(True)
-                        check_item.setCheckState(QtCore.Qt.Unchecked)
+                        check_item.setCheckState(QtCore.Qt.CheckState.Unchecked)
                         items.append(check_item)
                         for value in row:
                             item = QtGui.QStandardItem(str(value))
@@ -565,7 +565,7 @@ class ColorSearchApp(QtWidgets.QWidget):
                         model.appendRow(items)
                     self.ui.tableView.setModel(model)
                     self.ui.tableView.setColumnWidth(0, 50)
-                    self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
+                    self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                     self.check_models[sheet_name] = model
                     self.last_shown_sheet = sheet_name
                     # Add this to enable row click toggling checkbox
@@ -574,20 +574,16 @@ class ColorSearchApp(QtWidgets.QWidget):
                             # If user clicks directly on checkbox, let default behavior
                             return
                         row = index.row()
-                        check_item = model.item(row, 0)
-                        if check_item is not None:
-                            if check_item.checkState() == QtCore.Qt.Checked:
-                                check_item.setCheckState(QtCore.Qt.Unchecked)
-                            else:
-                                check_item.setCheckState(QtCore.Qt.Checked)
+                        index = model.index(row, 0)
+                        if index.isValid():
+                            current_state = model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
+                            new_state = QtCore.Qt.CheckState.Unchecked if current_state == QtCore.Qt.CheckState.Checked else QtCore.Qt.CheckState.Checked
+                            model.setData(index, new_state, QtCore.Qt.ItemDataRole.CheckStateRole)
                             self.update_checked_count()
                     self.ui.tableView.clicked.connect(toggle_checkbox_on_row_click1)
     
-                    # Also connect each checkbox to update_checked_count
-                    for row in range(model.rowCount()):
-                        check_item = model.item(row, 0)
-                        if check_item is not None:
-                            check_item.itemChanged = lambda: self.update_checked_count()
+                    # Connect the model's itemChanged signal to update_checked_count
+                    model.itemChanged.connect(lambda item: self.update_checked_count())
 
                     self.update_checked_count()  # Initial update
 
@@ -597,12 +593,25 @@ class ColorSearchApp(QtWidgets.QWidget):
                         return
                     checked_count = 0
                     for row in range(model.rowCount()):
-                        check_item = model.item(row, 0)
-                        if check_item is not None:
-                            check_item.setCheckState(QtCore.Qt.Unchecked)
+                        from PyQt5.QtGui import QStandardItemModel
+                        if isinstance(model, QStandardItemModel):
+                            from PyQt5.QtGui import QStandardItemModel
+                            if isinstance(model, QStandardItemModel):
+                                from PyQt5.QtGui import QStandardItemModel
+                                if isinstance(model, QStandardItemModel):
+                                    index = model.index(row, 0)
+                                    if index.isValid():
+                                        model.setData(index, QtCore.Qt.CheckState.Unchecked, QtCore.Qt.ItemDataRole.CheckStateRole)
+                                else:
+                                    index = model.index(row, 0)
+                                    if index.isValid():
+                                        model.setData(index, QtCore.Qt.CheckState.Unchecked, QtCore.Qt.ItemDataRole.CheckStateRole)
+                            index = model.index(row, 0)
+                            if index.isValid():
+                                model.setData(index, QtCore.Qt.CheckState.Unchecked, QtCore.Qt.ItemDataRole.CheckStateRole)
                     total_count = model.rowCount()
                     self.ui.textEdit.setText(f"{checked_count}/{total_count}")
-                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignCenter)  # Center text horizontally and vertically                
+                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)  # Center text horizontally and vertically
 
                 def select_all_checkboxes(self):
                     model = self.ui.tableView.model()
@@ -610,13 +619,13 @@ class ColorSearchApp(QtWidgets.QWidget):
                         return
                     checked_count = 0
                     for row in range(model.rowCount()):
-                        check_item = model.item(row, 0)
-                        if check_item is not None:
-                            check_item.setCheckState(QtCore.Qt.Checked)
+                        index = model.index(row, 0)
+                        if index.isValid():
+                            model.setData(index, QtCore.Qt.CheckState.Checked, QtCore.Qt.ItemDataRole.CheckStateRole)
                             checked_count += 1
                     total_count = model.rowCount()
                     self.ui.textEdit.setText(f"{checked_count}/{total_count}")
-                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignCenter)  # Center text horizontally and vertically
+                    self.ui.textEdit.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)  # Center text horizontally and vertically
 
                 def export_checked_rows(self):
                     from openpyxl.styles import Border, Side
@@ -654,7 +663,8 @@ class ColorSearchApp(QtWidgets.QWidget):
                     # Collect checked rows
                     checked_rows = []
                     for row in range(model.rowCount()):
-                        if model.item(row, 0).checkState() == QtCore.Qt.Checked:
+                        index = model.index(row, 0)
+                        if index.isValid() and model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole) == QtCore.Qt.CheckState.Checked:
                             checked_rows.append(row)
                     if not checked_rows:
                         QMessageBox.warning(self, "Lỗi", "Vui lòng chọn ít nhất một dòng để xuất.")
@@ -686,17 +696,17 @@ class ColorSearchApp(QtWidgets.QWidget):
                     success_count_final = 0
                     success_count_carcass = 0
                     for row in checked_rows:
-                        col4_value = model.item(row, 4).text() if model.item(row, 4) else ""
-                        col2 = model.item(row, 2).text() if model.item(row, 2) else ""
-                        col3 = model.item(row, 3).text() if model.item(row, 3) else ""
-                        col5 = model.item(row, 5).text() if model.item(row, 5) else ""
+                        col4_value = model.index(row, 4).data() if model.index(row, 4).isValid() else ""
+                        col2 = model.index(row, 2).data() if model.index(row, 2).isValid() else ""
+                        col3 = model.index(row, 3).data() if model.index(row, 3).isValid() else ""
+                        col5 = model.index(row, 5).data() if model.index(row, 5).isValid() else ""
                         col6 = 0  # Start as a number
                         for r in range(model.rowCount()):
-                            val2 = model.item(r, 2).text() if model.item(r, 2) else ""
-                            val3 = model.item(r, 3).text() if model.item(r, 3) else ""
-                            val4 = model.item(r, 4).text() if model.item(r, 4) else ""
+                            val2 = model.index(r, 2).data() if model.index(r, 2).isValid() else ""
+                            val3 = model.index(r, 3).data() if model.index(r, 3).isValid() else ""
+                            val4 = model.index(r, 4).data() if model.index(r, 4).isValid() else ""
                             if val2 == col2 and val3 == col3 and val4 == col4_value:
-                                val6 = model.item(r, 6).text() if model.item(r, 6) else "0"
+                                val6 = model.index(r, 6).data() if model.index(r, 6).isValid() else "0"
                                 try:
                                     col6 += float(val6)
                                 except ValueError:
@@ -807,9 +817,11 @@ class ColorSearchApp(QtWidgets.QWidget):
                             ws.print_area = f"A1:P{last_row}"
                             add_bottom_border(ws, last_row, start_col=1, end_col=16)
 
-                            ws.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Final_{current_sheet}_{col4_value}"
-                            from datetime import datetime
-                            ws.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
+                            if hasattr(ws, "oddHeader") and ws.oddHeader and hasattr(ws.oddHeader, "center"):
+                                ws.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Final_{current_sheet}_{col4_value}"
+                            #from datetime import datetime
+                            #if hasattr(ws, "oddHeader") and ws.oddHeader and hasattr(ws.oddHeader, "right"):
+                            #    ws.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
 
                         # --- Format_car_vi logic (same, but for MatrixCarcass/HangmucCarcass and ws2) ---
                         if "MatrixCarcass" in qc_wb.sheetnames and "HangmucCarcass" in qc_wb.sheetnames:
@@ -875,9 +887,10 @@ class ColorSearchApp(QtWidgets.QWidget):
                             # Set print area for ws2
                             last_row2 = last_data_row(ws2, max_col=12)
                             ws2.print_area = f"A1:P{last_row2}"
-                            ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass_{current_sheet}_{col4_value}"
-                            from datetime import datetime
-                            ws2.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
+                            if hasattr(ws2, "oddHeader") and ws2.oddHeader and hasattr(ws2.oddHeader, "center"):
+                                ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass_{current_sheet}_{col4_value}"
+                            #from datetime import datetime
+                            #ws2.oddHeader.right.text = datetime.today().strftime("Date: %d/%m/%Y")
 
                         # Save the combined workbook
                         try:
@@ -885,7 +898,8 @@ class ColorSearchApp(QtWidgets.QWidget):
                                 wb2.save(save_path2)
                                 success_count_carcass += 1
                             else:
-                                ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass+Final_{current_sheet}_{col4_value}"
+                                if hasattr(ws2, "oddHeader") and ws2.oddHeader and hasattr(ws2.oddHeader, "center"):
+                                    ws2.oddHeader.center.text = f"{po_number}_{col2}-{col3}_Carcass+Final_{current_sheet}_{col4_value}"
                                 wb.save(save_path)
                                 wb2.save(save_path2)
                                 success_count_final += 1
@@ -996,12 +1010,20 @@ class ColorFormDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_ColorDialog()
         self.ui.setupUi(self)
-        self.server_path = parent.server_path
+        self.server_path: str = getattr(parent, "server_path", "") or ""
+        if self.server_path is None:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), self.tr("Đường dẫn server_path không hợp lệ."))
+            self.server_path = ""  # Set to empty string to avoid None
+            return
         
         import pandas as pd
         from PyQt5.QtWidgets import QCompleter
 
         # Load product names from "Lacquer FIN"
+        if not self.server_path:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), self.tr("Đường dẫn server_path không hợp lệ."))
+            return
+        
         excel_path = os.path.join(self.server_path, "TLC - MASTER COLOR LIST FOR PRODUCTION.xlsx")
         product_names = []
         try:
@@ -1012,7 +1034,7 @@ class ColorFormDialog(QDialog):
             product_names = []
 
         completer = QCompleter(sorted(product_names), self)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)  # 0 = CaseInsensitive
         self.ui.lineEdit_3.setCompleter(completer)
         
         
@@ -1173,7 +1195,12 @@ class EffectFormDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_EffectDialog()
         self.ui.setupUi(self)
-        self.server_path = parent.server_path
+        self.server_path: str = getattr(parent, "server_path", "") or ""
+        if not self.server_path:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), self.tr("Đường dẫn server_path không hợp lệ."))
+            self.server_path = ""  # Prevent None
+            return
+        
         self.uploaded_image_path = None
         import pandas as pd
         from PyQt5.QtWidgets import QCompleter
@@ -1189,7 +1216,7 @@ class EffectFormDialog(QDialog):
             effect_names = []
 
         completer = QCompleter(sorted(effect_names), self)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)  # 0 = CaseInsensitive
         self.ui.lineEdit_1.setCompleter(completer)
 
         self.ui.UpAnhHUButton.clicked.connect(self.upload_image)
@@ -1317,7 +1344,11 @@ class MetalFormDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_MetalDialog()
         self.ui.setupUi(self)
-        self.server_path = parent.server_path
+        self.server_path: str = getattr(parent, "server_path", "") or ""
+        if not self.server_path:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), self.tr("Đường dẫn server_path không hợp lệ."))
+            self.server_path = ""  # Prevent None
+            return
         self.uploaded_image_path = None
 
         import pandas as pd
@@ -1334,7 +1365,7 @@ class MetalFormDialog(QDialog):
             metal_names = []
 
         completer = QCompleter(sorted(metal_names), self)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)  # 0 = CaseInsensitive
         self.ui.lineEdit_2.setCompleter(completer)
         self.ui.UpAnhMeButton.clicked.connect(self.upload_image)
         self.ui.ThemMetalButton.clicked.connect(self.add_new_metal)
@@ -1486,7 +1517,11 @@ class WoodFormDialog(QDialog):
         super().__init__(parent)
         self.ui = Ui_WoodDialog()
         self.ui.setupUi(self)
-        self.server_path = parent.server_path
+        self.server_path: str = getattr(parent, "server_path", "") or ""
+        if not self.server_path:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), self.tr("Đường dẫn server_path không hợp lệ."))
+            self.server_path = ""  # Prevent None
+            return
         self.uploaded_image_path = None
 
         import pandas as pd
@@ -1503,7 +1538,7 @@ class WoodFormDialog(QDialog):
             wood_names = []
 
         completer = QCompleter(sorted(wood_names), self)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
         self.ui.lineEdit_2.setCompleter(completer)
         self.ui.UpAnhGoButton.clicked.connect(self.upload_image)
         self.ui.ThemGoButton.clicked.connect(self.add_new_wood)
@@ -1733,8 +1768,8 @@ class BVSTDWindow(QDialog):
                 scaled_pixmap = pixmap.scaled(
                     self.ui.previewLabel.width(),
                     self.ui.previewLabel.height(),
-                    QtCore.Qt.KeepAspectRatio,
-                    QtCore.Qt.SmoothTransformation
+                    QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+                    QtCore.Qt.TransformationMode.SmoothTransformation
                 )
                 self.ui.previewLabel.setPixmap(scaled_pixmap)
                 return
@@ -1792,9 +1827,9 @@ class BVSTDWindow(QDialog):
             try:
                 doc = fitz.open(source_file)
                 page = doc.load_page(0)  # First page
+                from PyQt5.QtGui import QImage, QPixmap
                 pix = page.get_pixmap(dpi=200)
                 image_bytes = pix.tobytes("ppm")
-                from PyQt5.QtGui import QImage, QPixmap
                 image = QImage.fromData(image_bytes)
                 pixmap = QPixmap.fromImage(image)
                 if pixmap.isNull():
@@ -1923,45 +1958,50 @@ class BVSTDWindow(QDialog):
             except Exception as e:
                 QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file PowerPoint')}: {e}")
     
-    def open_selected_file(self):
-        from PyQt5.QtWidgets import QMessageBox
+def open_selected_file(self):
+    from PyQt5.QtWidgets import QMessageBox
 
-        selected_items = self.ui.resultList.selectedItems()
-        if not selected_items:
-            QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Vui lòng chọn một file để mở."))
-            return
-        file_name = selected_items[0].text()
-        source_file = next((f for f in self.found_files if os.path.basename(f) == file_name), None)
+    selected_items = self.ui.resultList.selectedItems()
+    if not selected_items:
+        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Vui lòng chọn một file để mở."))
+        return
+    
+    file_name = selected_items[0].text()
+    source_file = next((f for f in self.found_files if os.path.basename(f) == file_name), None)
 
-        if source_file and os.path.exists(source_file):
-            try:
-                os.startfile(source_file)  # Windows only
-            except Exception as e:
-                QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file')}: {e}")
-                msg = QMessageBox(self)
-                msg.setIcon(QMessageBox.Warning)
-                msg.setWindowTitle("Lỗi")
-                msg.setText(self.tr("Không thể copy do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục."
-                "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
-                "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
-                msg.setStandardButtons(QMessageBox.Ok)
-                ret = msg.exec_()
-                if ret == QMessageBox.Ok:
-                    folder = os.path.dirname(source_file)
-                    os.startfile(folder)
-        else:
-            QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
+    if not source_file:
+        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
+        return
+
+    if os.path.exists(source_file):
+        try:
+            os.startfile(source_file)  # Windows only
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file')}: {e}")
+            folder = os.path.dirname(source_file)
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Warning)
             msg.setWindowTitle("Lỗi")
-            msg.setText(self.tr("Không thể copy do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
-                    "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
-                    "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
+            msg.setText(self.tr("Không thể mở do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
+            "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
+            "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
             msg.setStandardButtons(QMessageBox.Ok)
             ret = msg.exec_()
             if ret == QMessageBox.Ok:
-                folder = os.path.dirname(source_file)
                 os.startfile(folder)
+    else:
+        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
+        folder = os.path.dirname(source_file)
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Lỗi")
+        msg.setText(self.tr("Không thể mở do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
+                "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
+                "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
+        msg.setStandardButtons(QMessageBox.Ok)
+        ret = msg.exec_()
+        if ret == QMessageBox.Ok:
+            os.startfile(folder)
 
 class timsp(QtWidgets.QMainWindow):
     def __init__(self, server_path):
@@ -2002,7 +2042,7 @@ class timsp(QtWidgets.QMainWindow):
                         product_names.add(str(cell.value).strip())
 
         completer = QCompleter(sorted(product_names), self)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
         self.ui.lineEdit.setCompleter(completer)
     
     def handle_timsp_button(self):
@@ -2019,8 +2059,14 @@ class timsp(QtWidgets.QMainWindow):
         layout.addWidget(btn_carcass)
         layout.addWidget(btn_final)
         
-        btn_final.clicked.connect(lambda: (setattr(self, "search_mode", "Final"), dialog.accept()))
-        btn_carcass.clicked.connect(lambda: (setattr(self, "search_mode", "Carcass"), dialog.accept()))
+        def set_final_mode():
+            setattr(self, "search_mode", "Final")
+            dialog.accept()
+        btn_final.clicked.connect(set_final_mode)
+        def set_carcass_mode():
+            setattr(self, "search_mode", "Carcass")
+            dialog.accept()
+        btn_carcass.clicked.connect(set_carcass_mode)
     
         dialog.exec_()
     
@@ -2076,7 +2122,11 @@ class timsp(QtWidgets.QMainWindow):
             value = str(cell.value).strip().lower() if cell.value else ""
             if keyword in value:
                 # Get the whole row in the range
-                row_data = [ws.cell(row=cell.row, column=col).value for col in range(min_col, max_col + 1)]
+                row_idx = row[0].row
+                if row_idx is not None:
+                    row_data = [ws.cell(row=row_idx, column=col).value for col in range(min_col, max_col + 1)]
+                else:
+                    row_data = [""] * (max_col - min_col + 1)
                 results.append(row_data)
     
         # Set up the model for QTableView
@@ -2088,18 +2138,18 @@ class timsp(QtWidgets.QMainWindow):
         font.setBold(True)
         font.setPointSize(12)
         for col in range(model.columnCount()):
-            model.setHeaderData(col, QtCore.Qt.Horizontal, font, QtCore.Qt.FontRole)
+            model.setHeaderData(col, QtCore.Qt.Orientation.Horizontal, font, QtCore.Qt.ItemDataRole.FontRole)
     
         for row_data in results:
             items = []
             for value in row_data:
                 item = QStandardItem(str(value) if value is not None else "")
-                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 items.append(item)
             model.appendRow(items)
     
         self.ui.tableView.setModel(model)
-        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
     
         if not results:
             QtWidgets.QMessageBox.information(self, self.tr("Kết quả"), self.tr("Không tìm thấy sản phẩm phù hợp."))
@@ -2134,8 +2184,9 @@ class timsp(QtWidgets.QMainWindow):
         model = self.ui.tableView.model()
         row_data = []
         for col in range(model.columnCount()):
-            item = model.item(selected_row, col)
-            row_data.append(item.text() if item else "")
+            index = model.index(selected_row, col)
+            value = model.data(index) if index.isValid() else ""
+            row_data.append(str(value) if value is not None else "")
 
         # Open Excel and get the correct Hangmuc sheet
         excel_path = os.path.join(self.server_path, "List Product QC.xlsx")
@@ -2173,18 +2224,18 @@ class timsp(QtWidgets.QMainWindow):
         font.setBold(True)
         font.setPointSize(12)
         for col in range(model.columnCount()):
-            model.setHeaderData(col, QtCore.Qt.Horizontal, font, QtCore.Qt.FontRole)
+            model.setHeaderData(col, QtCore.Qt.Orientation.Horizontal, font, QtCore.Qt.ItemDataRole.FontRole)
 
         for row in hangmuc_results:
             items = []
             for value in row:
                 item = QStandardItem(str(value) if value is not None else "")
-                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 items.append(item)
             model.appendRow(items)
 
         dialog.ui.tableView.setModel(model)
-        dialog.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        dialog.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Show image when a row is selected
         def show_image_for_row(row):
@@ -2197,7 +2248,7 @@ class timsp(QtWidgets.QMainWindow):
                 if os.path.exists(image_path):
                     pixmap = QtGui.QPixmap(image_path)
                     if not pixmap.isNull():
-                        scaled = pixmap.scaled(400, 400, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                        scaled = pixmap.scaled(400, 400, QtCore.Qt.AspectRatioMode.KeepAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation)
                         dialog.ui.imageLabel.setPixmap(scaled)
                         return
             dialog.ui.imageLabel.clear()
@@ -2225,10 +2276,10 @@ class TCKiemtraDialog(QDialog):
 
         # Path to the template Excel file
         if self.search_mode == "Carcass":
-            excel_path = os.path.join(self.parent().server_path, "QC Check list - Format carcass - vi.xlsx")
+            excel_path = os.path.join(self.server_path, "QC Check list - Format carcass - vi.xlsx")
             sheet_name = "Format_car_vi"
         else:
-            excel_path = os.path.join(self.parent().server_path, "QC Check list - Format.xlsx")
+            excel_path = os.path.join(self.server_path, "QC Check list - Format.xlsx")
             sheet_name = "Format_fin_vi"
         
         if not os.path.exists(excel_path):
@@ -2251,11 +2302,10 @@ class TCKiemtraDialog(QDialog):
         # Write data to the Excel sheet
         for row in range(model.rowCount()):
             # index 0 -> column B, index 1 -> column A, index 2 -> column D, index 3 -> column G, index 4 -> column L
-            ws.cell(row=9+row, column=2).value = model.item(row, 0).text() if model.item(row, 0) else ""
-            ws.cell(row=9+row, column=1).value = model.item(row, 1).text() if model.item(row, 1) else ""
-            ws.cell(row=9+row, column=4).value = model.item(row, 2).text() if model.item(row, 2) else ""
-            ws.cell(row=9+row, column=7).value = model.item(row, 3).text() if model.item(row, 3) else ""
-            ws.cell(row=9+row, column=12).value = model.item(row, 4).text() if model.item(row, 4) else ""
+            for excel_col, model_col in zip([2, 1, 4, 7, 12], range(5)):
+                index = model.index(row, model_col)
+                value = model.data(index) if index.isValid() else None
+                ws.cell(row=9+row, column=excel_col).value = value if value not in ("", None) else None
         
         # Assign lineEdit and lineEdit_2 values to specific cells
         ws["C4"].value = self.ui.lineEdit.text().upper()
@@ -2285,7 +2335,8 @@ class TCKiemtraDialog(QDialog):
             # Excel sheet names can't have: : \ / ? * [ ]
             return re.sub(r'[:\\/*?\[\]]', "_", s)[:31]  # Excel sheet name max length is 31
 
-        ws.oddHeader.center.text = f"{sanitize1(name1)}_{sanitize1(name2)}_{sanitize1(name3)}" if name1 or name2 or name3 else "Sheet1"
+        if hasattr(ws, "oddHeader") and ws.oddHeader is not None and hasattr(ws.oddHeader, "center"):
+            ws.oddHeader.center.text = f"{sanitize1(name1)}_{sanitize1(name2)}_{sanitize1(name3)}" if name1 or name2 or name3 else "Sheet1"
         # Rename the worksheet
         ws.title = sheet_name
 
@@ -2336,7 +2387,7 @@ class CollectionDialog(QDialog):
         "HOWELONDONButton": "HOWE LONDON",
         "THELACQUERCOMPANYButton": "THE LACQUER COMPANY",
         "SCHUMACHERButton": "SCHUMACHER",
-        "CHRISTOPHERSPITZMILLERButton": "CHRISTOPHER SPITZMILLER",
+        "CHRISTOPHERSPITZMILLERButton": "CHRISTOPHER SPIT",
         "SALVESENGRAHAMButton": "SALVESEN GRAHAM",
         "JEFFREYBILHUBERButton": "JEFFREY BILHUBER",
         "CAMPBELLREYButton": "CAMPBELL-REY",
@@ -2394,12 +2445,12 @@ class CollectionDialog(QDialog):
             item_name = QStandardItem(str(row["PRODUCT NAME"]))
             item_no = QStandardItem(str(row["ITEM NO."]))
             item_color = QStandardItem(str(row["COLOR"]))
-            item_name.setTextAlignment(QtCore.Qt.AlignCenter)
-            item_no.setTextAlignment(QtCore.Qt.AlignCenter)
-            item_color.setTextAlignment(QtCore.Qt.AlignCenter)
+            item_name.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item_no.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item_color.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             model.appendRow([item_name, item_no, item_color])
         self.ui.tableView.setModel(model)
-        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Set minimum width for "PRODUCT NAME" (column 0) and "COLOR" (column 2)
         self.ui.tableView.setColumnWidth(0, max(240, self.ui.tableView.columnWidth(0)))
@@ -2445,13 +2496,13 @@ class defectlist(QtWidgets.QWidget):
             for row in data[1:]:
                 items = [QStandardItem(cell) for cell in row]
                 for item in items:
-                    item.setTextAlignment(QtCore.Qt.AlignCenter)
+                    item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
                 model.appendRow(items)
 
         self.ui.tableView.setModel(model)
         self.ui.tableView.setAlternatingRowColors(True)
         self.ui.tableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        self.ui.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.ui.tableView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.tableView.setShowGrid(True)

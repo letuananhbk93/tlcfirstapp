@@ -1,7 +1,7 @@
 from rembg import remove
 from PIL import Image
-input_path = 'Images/ICON.JPG'
-output_path = 'Images/ICON.png'
+input_path = 'Erasebackground/tlclogo3.jpg'
+output_path = 'Erasebackground/tlclogo3.png'
 inp = Image.open(input_path)
 output = remove(inp)
 # Tạo nền trắng

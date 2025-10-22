@@ -40,6 +40,7 @@ class StartWindow(QtWidgets.QMainWindow):
         self.wh_window.show()
 
 if __name__ == "__main__":
+    global lang_code
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/images/tlclogo4.png"))
     translator = QTranslator()
