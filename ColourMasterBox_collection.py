@@ -918,12 +918,12 @@ class ColorSearchApp(QtWidgets.QWidget):
                                     ws2 = wb2_xlw.sheets[0]
 
                                     # Find last used row in ws (final file)
-                                    last_row = ws.range("A" + str(ws.cells.last_cell.row)).end("up").row
+                                    last_row = ws.range("B" + str(ws.cells.last_cell.row)).end("up").row
 
                                     # Find last used row in ws2 (carcass file)
-                                    last_row2 = ws2.range("A" + str(ws2.cells.last_cell.row)).end("up").row
+                                    last_row2 = ws2.range("B" + str(ws2.cells.last_cell.row)).end("up").row
 
-                                    # Copy A1:P{last_row} from ws
+                                    # Copy A2:P{last_row} from ws
                                     rng_to_copy = ws.range(f"A2:P{last_row}")
                                     # Paste to ws2, starting at first empty row (last_row2 + 2)
                                     dest_rng = ws2.range(f"A{last_row2 + 2}")
@@ -933,11 +933,34 @@ class ColorSearchApp(QtWidgets.QWidget):
                                     ws2.range(f"{last_row2 + 1}:{last_row2 + 1}").row_height = 27
 
                                     # Find new last row after paste
-                                    new_last_row2 = ws2.range("A" + str(ws2.cells.last_cell.row)).end("up").row
+                                    new_last_row2 = ws2.range("B" + str(ws2.cells.last_cell.row)).end("up").row
 
                                     # Set print area again (A1:P{new_last_row2})
                                     ws2.api.PageSetup.PrintArea = f"$A$1:$P${new_last_row2}"
 
+                                    # --- Auto-fit row heights for merged cells G-K (columns 7-11) ---
+                                    # Calculate total width of columns G to K
+                                    total_width = sum(ws2.range(f"{chr(64 + col)}:{chr(64 + col)}").column_width for col in range(7, 12))  # G=7, K=11
+
+                                    for row in range(9, new_last_row2 + 1):  # From row 9 to last row
+                                        cell_value = ws2.range(f"G{row}").value
+                                        if cell_value:  # Only process if there's text in column G
+                                            # Copy text to temporary column Z
+                                            ws2.range(f"Z{row}").value = cell_value
+                                            # Set column Z width to total width of G-K
+                                            ws2.range("Z:Z").column_width = total_width
+                                            # Enable wrap text on Z
+                                            ws2.range(f"Z{row}").api.WrapText = True
+                                            # Auto-fit the row to calculate height
+                                            ws2.range(f"Z{row}").api.EntireRow.AutoFit()
+                                            # Get the calculated height
+                                            calculated_height = ws2.range(f"Z{row}").row_height
+                                            # Apply the height to the original row
+                                            ws2.range(f"{row}:{row}").row_height = calculated_height
+                                            # Clear the temporary cell
+                                            ws2.range(f"Z{row}").value = None
+
+                                    # Save file
                                     wb2_xlw.save()
                                     wb2_xlw.close()
                                     wb_xlw.close()
@@ -1117,7 +1140,7 @@ class ColorFormDialog(QDialog):
 
             file_uri = QtCore.QUrl.fromLocalFile(file_path).toString()
             html = f'<img src="{file_uri}" width="{width}" height="{height}">'
-            self.ui.textEdit_1.setHtml(html)
+            self.ui.textEdit.setHtml(html)
             self.uploaded_image_path = file_path  # <-- Save the path
 
     def update_color(self):
@@ -1239,7 +1262,7 @@ class EffectFormDialog(QDialog):
 
             file_uri = QtCore.QUrl.fromLocalFile(file_path).toString()
             html = f'<img src="{file_uri}" width="{width}" height="{height}">'
-            self.ui.textEdit_1.setHtml(html)
+            self.ui.textEdit.setHtml(html)
             self.uploaded_image_path = file_path
 
     def add_new_effect(self):
@@ -1387,7 +1410,7 @@ class MetalFormDialog(QDialog):
 
             file_uri = QtCore.QUrl.fromLocalFile(file_path).toString()
             html = f'<img src="{file_uri}" width="{width}" height="{height}">'
-            self.ui.textEdit_1.setHtml(html)
+            self.ui.textEdit.setHtml(html)
             self.uploaded_image_path = file_path
 
     def add_new_metal(self):
@@ -1560,7 +1583,7 @@ class WoodFormDialog(QDialog):
 
             file_uri = QtCore.QUrl.fromLocalFile(file_path).toString()
             html = f'<img src="{file_uri}" width="{width}" height="{height}">'
-            self.ui.textEdit_1.setHtml(html)
+            self.ui.textEdit.setHtml(html)
             self.uploaded_image_path = file_path
 
     def add_new_wood(self):
@@ -1828,7 +1851,7 @@ class BVSTDWindow(QDialog):
                 doc = fitz.open(source_file)
                 page = doc.load_page(0)  # First page
                 from PyQt5.QtGui import QImage, QPixmap
-                pix = page.get_pixmap(dpi=200)
+                pix = page.get_pixmap(dpi=200) # type: ignore
                 image_bytes = pix.tobytes("ppm")
                 image = QImage.fromData(image_bytes)
                 pixmap = QPixmap.fromImage(image)
@@ -1958,50 +1981,50 @@ class BVSTDWindow(QDialog):
             except Exception as e:
                 QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file PowerPoint')}: {e}")
     
-def open_selected_file(self):
-    from PyQt5.QtWidgets import QMessageBox
+    def open_selected_file(self):
+        from PyQt5.QtWidgets import QMessageBox
 
-    selected_items = self.ui.resultList.selectedItems()
-    if not selected_items:
-        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Vui lòng chọn một file để mở."))
-        return
-    
-    file_name = selected_items[0].text()
-    source_file = next((f for f in self.found_files if os.path.basename(f) == file_name), None)
+        selected_items = self.ui.resultList.selectedItems()
+        if not selected_items:
+            QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Vui lòng chọn một file để mở."))
+            return
+        
+        file_name = selected_items[0].text()
+        source_file = next((f for f in self.found_files if os.path.basename(f) == file_name), None)
 
-    if not source_file:
-        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
-        return
+        if not source_file:
+            QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
+            return
 
-    if os.path.exists(source_file):
-        try:
-            os.startfile(source_file)  # Windows only
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file')}: {e}")
+        if os.path.exists(source_file):
+            try:
+                os.startfile(source_file)  # Windows only
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, self.tr("Lỗi"), f"{self.tr('Không thể mở file')}: {e}")
+                folder = os.path.dirname(source_file)
+                msg = QMessageBox(self)
+                msg.setIcon(QMessageBox.Warning)
+                msg.setWindowTitle("Lỗi")
+                msg.setText(self.tr("Không thể mở do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
+                "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
+                "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
+                msg.setStandardButtons(QMessageBox.Ok)
+                ret = msg.exec_()
+                if ret == QMessageBox.Ok:
+                    os.startfile(folder)
+        else:
+            QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
             folder = os.path.dirname(source_file)
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Warning)
             msg.setWindowTitle("Lỗi")
             msg.setText(self.tr("Không thể mở do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
-            "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
-            "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
+                    "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
+                    "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
             msg.setStandardButtons(QMessageBox.Ok)
             ret = msg.exec_()
             if ret == QMessageBox.Ok:
                 os.startfile(folder)
-    else:
-        QtWidgets.QMessageBox.warning(self, self.tr("Lỗi"), self.tr("Không tìm thấy file."))
-        folder = os.path.dirname(source_file)
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Warning)
-        msg.setWindowTitle("Lỗi")
-        msg.setText(self.tr("Không thể mở do file chưa đồng bộ. Mình sẽ dẫn bạn tới thư mục. "
-                "Hướng dẫn:\nChuột phải vào file, chọn Onedrive, chọn Copy Link, dán vào Chrome để mở và download"
-                "\nNếu không có Onedrive, Chuột phải vào file, chọn 'Always keep on this device'. Chờ đồng bộ xong rồi thử lại."))
-        msg.setStandardButtons(QMessageBox.Ok)
-        ret = msg.exec_()
-        if ret == QMessageBox.Ok:
-            os.startfile(folder)
 
 class timsp(QtWidgets.QMainWindow):
     def __init__(self, server_path):
@@ -2212,7 +2235,7 @@ class timsp(QtWidgets.QMainWindow):
                         hangmuc_results.append([header_value] + hangmuc_row_data)
 
         # Show in dialog
-        dialog = TCKiemtraDialog(self, searched_value=self.ui.lineEdit.text(),search_mode = self.search_mode)
+        dialog = TCKiemtraDialog(self, searched_value=self.ui.lineEdit.text(), search_mode=self.search_mode, server_path=self.server_path)
 
         model = QStandardItemModel()
         model.setColumnCount(6)  # Columns B to F (1 to 5 in Excel)
@@ -2260,12 +2283,15 @@ class timsp(QtWidgets.QMainWindow):
         
 
 class TCKiemtraDialog(QDialog):
-    def __init__(self, parent=None, searched_value="",search_mode=None):
+    def __init__(self, parent=None, searched_value="", search_mode=None, server_path=""):
         super().__init__(parent)
         self.ui = Ui_TCKiemtraDialog()
         self.ui.setupUi(self)
         self.ui.exportexcelButton.clicked.connect(self.export_to_excel)
         
+        # Store server_path for export_to_excel and other uses
+        self.server_path = server_path
+
         # Set lineEdit_2 with the searched value from timsp
         self.ui.lineEdit_2.setText(searched_value)
         self.search_mode = search_mode
